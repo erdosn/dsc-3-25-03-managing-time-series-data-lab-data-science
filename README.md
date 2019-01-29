@@ -36,10 +36,6 @@ import statsmodels.api as sm
 import matplotlib.pyplot as plt
 ```
 
-    /Users/lore.dirick/anaconda3/lib/python3.6/site-packages/statsmodels/compat/pandas.py:56: FutureWarning: The pandas.core.datetools module is deprecated and will be removed in a future version. Please use the pandas.tseries module instead.
-      from pandas.core import datetools
-
-
 ## Loading time series data
 The `StatsModels` library comes bundled with built-in datasets for experimentation and practice. A detailed description of these datasets can be found [here](http://www.statsmodels.org/dev/datasets/index.html). Using `StatsModels`, the time series datasets can be loaded straight into memory. 
 
@@ -50,9 +46,635 @@ We can bring in this data using the `load_pandas()`-method, which will allow us 
 
 ```python
 # Load the "co2" dataset from sm.datasets
-CO2_dataset = sm.datasets.co2.load_pandas()
+CO2_dataset = sm.datasets.co2.load_pandas() # load_pandas may not work
 CO2 = CO2_dataset.data
 ```
+
+### load_pandas not working? Do this
+
+
+```python
+CO2_dataset = sm.datasets.co2.load()
+```
+
+
+```python
+df = pd.DataFrame(CO2_dataset.data)
+df.head() 
+# byte-string
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>date</th>
+      <th>co2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>b'19580329'</td>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>b'19580405'</td>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>b'19580412'</td>
+      <td>317.6</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>b'19580419'</td>
+      <td>317.5</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>b'19580426'</td>
+      <td>316.4</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+df.date = df.date.map(lambda s: s.decode('utf-8'))
+df.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>date</th>
+      <th>co2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>19580329</td>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>19580405</td>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>19580412</td>
+      <td>317.6</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>19580419</td>
+      <td>317.5</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>19580426</td>
+      <td>316.4</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+df.date = pd.to_datetime(df.date)
+df.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>date</th>
+      <th>co2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1958-03-29</td>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1958-04-05</td>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1958-04-12</td>
+      <td>317.6</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1958-04-19</td>
+      <td>317.5</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1958-04-26</td>
+      <td>316.4</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+date_index = pd.DatetimeIndex(df.date, freq='W-SAT')
+df.set_index(date_index, inplace=True)
+print(df.head())
+df.drop(columns=['date'], axis=1, inplace=True)
+df.head()
+```
+
+                     date    co2
+    date                        
+    1958-03-29 1958-03-29  316.1
+    1958-04-05 1958-04-05  317.3
+    1958-04-12 1958-04-12  317.6
+    1958-04-19 1958-04-19  317.5
+    1958-04-26 1958-04-26  316.4
+
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>co2</th>
+    </tr>
+    <tr>
+      <th>date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1958-03-29</th>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1958-04-05</th>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>1958-04-12</th>
+      <td>317.6</td>
+    </tr>
+    <tr>
+      <th>1958-04-19</th>
+      <td>317.5</td>
+    </tr>
+    <tr>
+      <th>1958-04-26</th>
+      <td>316.4</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+df_month = df.resample('M').mean()
+df_month.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>co2</th>
+    </tr>
+    <tr>
+      <th>date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1958-03-31</th>
+      <td>316.100000</td>
+    </tr>
+    <tr>
+      <th>1958-04-30</th>
+      <td>317.200000</td>
+    </tr>
+    <tr>
+      <th>1958-05-31</th>
+      <td>317.433333</td>
+    </tr>
+    <tr>
+      <th>1958-06-30</th>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1958-07-31</th>
+      <td>315.625000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+df_day = df.resample('d').ffill()
+df_day.head(20)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>co2</th>
+    </tr>
+    <tr>
+      <th>date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1958-03-29</th>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1958-03-30</th>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1958-03-31</th>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1958-04-01</th>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1958-04-02</th>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1958-04-03</th>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1958-04-04</th>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1958-04-05</th>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>1958-04-06</th>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>1958-04-07</th>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>1958-04-08</th>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>1958-04-09</th>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>1958-04-10</th>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>1958-04-11</th>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>1958-04-12</th>
+      <td>317.6</td>
+    </tr>
+    <tr>
+      <th>1958-04-13</th>
+      <td>317.6</td>
+    </tr>
+    <tr>
+      <th>1958-04-14</th>
+      <td>317.6</td>
+    </tr>
+    <tr>
+      <th>1958-04-15</th>
+      <td>317.6</td>
+    </tr>
+    <tr>
+      <th>1958-04-16</th>
+      <td>317.6</td>
+    </tr>
+    <tr>
+      <th>1958-04-17</th>
+      <td>317.6</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+df_day.index
+```
+
+
+
+
+    DatetimeIndex(['1958-03-29', '1958-03-30', '1958-03-31', '1958-04-01',
+                   '1958-04-02', '1958-04-03', '1958-04-04', '1958-04-05',
+                   '1958-04-06', '1958-04-07',
+                   ...
+                   '2001-12-20', '2001-12-21', '2001-12-22', '2001-12-23',
+                   '2001-12-24', '2001-12-25', '2001-12-26', '2001-12-27',
+                   '2001-12-28', '2001-12-29'],
+                  dtype='datetime64[ns]', name='date', length=15982, freq='D')
+
+
+
+
+```python
+df.head(20)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>co2</th>
+    </tr>
+    <tr>
+      <th>date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1958-03-29</th>
+      <td>316.1</td>
+    </tr>
+    <tr>
+      <th>1958-04-05</th>
+      <td>317.3</td>
+    </tr>
+    <tr>
+      <th>1958-04-12</th>
+      <td>317.6</td>
+    </tr>
+    <tr>
+      <th>1958-04-19</th>
+      <td>317.5</td>
+    </tr>
+    <tr>
+      <th>1958-04-26</th>
+      <td>316.4</td>
+    </tr>
+    <tr>
+      <th>1958-05-03</th>
+      <td>316.9</td>
+    </tr>
+    <tr>
+      <th>1958-05-10</th>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1958-05-17</th>
+      <td>317.5</td>
+    </tr>
+    <tr>
+      <th>1958-05-24</th>
+      <td>317.9</td>
+    </tr>
+    <tr>
+      <th>1958-05-31</th>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1958-06-07</th>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1958-06-14</th>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1958-06-21</th>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1958-06-28</th>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1958-07-05</th>
+      <td>315.8</td>
+    </tr>
+    <tr>
+      <th>1958-07-12</th>
+      <td>315.8</td>
+    </tr>
+    <tr>
+      <th>1958-07-19</th>
+      <td>315.4</td>
+    </tr>
+    <tr>
+      <th>1958-07-26</th>
+      <td>315.5</td>
+    </tr>
+    <tr>
+      <th>1958-08-02</th>
+      <td>315.6</td>
+    </tr>
+    <tr>
+      <th>1958-08-09</th>
+      <td>315.1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+df_day.plot()
+```
+
+
+
+
+    <matplotlib.axes._subplots.AxesSubplot at 0x115656ac8>
+
+
+
+
+![png](index_files/index_16_1.png)
+
+
+
+```python
+df.index
+```
+
+
+
+
+    DatetimeIndex(['1958-03-29', '1958-04-05', '1958-04-12', '1958-04-19',
+                   '1958-04-26', '1958-05-03', '1958-05-10', '1958-05-17',
+                   '1958-05-24', '1958-05-31',
+                   ...
+                   '2001-10-27', '2001-11-03', '2001-11-10', '2001-11-17',
+                   '2001-11-24', '2001-12-01', '2001-12-08', '2001-12-15',
+                   '2001-12-22', '2001-12-29'],
+                  dtype='datetime64[ns]', name='date', length=2284, freq='W-SAT')
+
+
 
 Let's check the type of CO2 and also first 15 entries of CO2 dataframe as our first exploratory step.
 
